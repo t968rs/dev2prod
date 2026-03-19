@@ -1,0 +1,52 @@
+{
+  "source_root": "E:/automation/fp_dev_04",
+  "dest_root": "E:/automation/fp_prod",
+  "debug_override_rel": "scripts/fpm/__init__.py",
+  "global_denied": [
+    "__pycache__",
+    "*.pyc",
+    "*.pyi",
+    "*.pyo",
+    "*.bak",
+    ".git",
+    ".github",
+    ".vscode",
+    ".idea",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".coverage",
+    "*.egg-info"
+  ],
+  "top_level_files": [
+    "README.md",
+    "LICENSE",
+    "*.atbx"
+  ],
+  "folders": [
+    {
+      "name": "scripts",
+      "required": true,
+      "allowed": [],
+      "denied": [
+        "_pre_tbx/**",
+        "_admin_utils/**",
+        "pyt_scripts/**"
+      ]
+    },
+    {
+      "name": "calcs",
+      "required": true,
+      "allowed": [],
+      "denied": []
+    },
+    {
+      "name": "reference",
+      "required": false,
+      "allowed": [],
+      "denied": [
+        "reference_modules/**",
+        "toolbox_figures/**"
+      ]
+    }
+  ]
+}
