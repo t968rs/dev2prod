@@ -6,3 +6,5 @@ out
 gen
 # ENV
 .env
+*.lock
+/FPM.txt
