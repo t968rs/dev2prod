@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dev2prod.py - Convert Python repository from development to production mode
+dev2prod_DEP.py - Convert Python repository from development to production mode
 
 This module handles the transition from development to production for Python projects by:
 1. Copying the repository to a target location
