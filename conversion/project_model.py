@@ -56,6 +56,9 @@ class ProdConfig(BaseModel):
     # Relative path from dest_root to the file containing _debug_override.
     debug_override_rel: str = "fpm/__init__.py"
 
+    def __str__( self ):
+        return self.model_dump_json(indent=2, ensure_ascii=True)
+
     @classmethod
     def from_json(cls, path: Union[str, Path]) -> "ProdConfig":
         with open(path, encoding="utf-8") as fh:

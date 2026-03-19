@@ -24,7 +24,7 @@
     {
       "name": "scripts",
       "required": true,
-      "allowed": [],
+      "allowed": ["fpm/**"],
       "denied": [
         "_pre_tbx/**",
         "_admin_utils/**",

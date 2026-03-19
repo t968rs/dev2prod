@@ -19,7 +19,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
-from .project_model import ProjectPaths, ProdConfig, FolderSpec
+from conversion.project_model import ProjectPaths, ProdConfig, FolderSpec
 
 
 _HERE_DIR = Path(__file__).parent.resolve()
@@ -252,6 +252,7 @@ class ProdCopier:
             ok, err = self._copy_file(src_file, dst)
             if err:
                 errors.append(err)
+                print(f'ERROR: {err}')
             elif ok:
                 copied.append(dst)
             else:
@@ -285,8 +286,10 @@ class ProdCopier:
         patched: List[Path] = []
         errors: List[str] = []
         target = self._paths.dest_root / self._cfg.debug_override_rel
-        if not target.is_file():
+        if not target.is_file() and not self._dry_run:
             errors.append(f"debug_override_rel not found in dest: {target}")
+            return patched, errors
+        elif self._dry_run:
             return patched, errors
         try:
             content = target.read_text(encoding="utf-8")
