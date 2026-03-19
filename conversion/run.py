@@ -1,12 +1,12 @@
 
 
 if __name__ == "__main__":
-    from conversion.prod_deploy import ProdConfig, ProdCopier
+    from conversion.prod_deploy import load_project, ProdCopier
 
-    cfg = ProdConfig.from_json("prod_deploy.json")
+    cfg, paths = load_project("fbs")
 
     # Preview
-    result = ProdCopier(cfg, dry_run=True).run()
+    result = ProdCopier(cfg, paths, dry_run=True).run()
     print(f"{len(result.copied)} files would be copied")
 
     # Real run, clean slate
