@@ -8,3 +8,4 @@ gen
 .env
 *.lock
 /FPM.txt
+/_in_progress/add-error-handling.py
