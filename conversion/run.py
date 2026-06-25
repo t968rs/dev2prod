@@ -6,13 +6,16 @@ if __name__ == "__main__":
     cfg, paths = load_project("fpm")
     print(str(cfg))
 
-    # Preview
-    result = ProdCopier(cfg, paths, dry_run=False).run()
+    # Preview: walk and filter without writing anything.
+    preview = ProdCopier(cfg, paths, dry_run=True).run()
+    assert preview.ok, preview.errors
+    print(f"{len(preview.copied)} files would be copied.")
 
-    print(f"{len(result.copied)} files copied.")
+    # Real deployment (writes to dest_root).
+    result = ProdCopier(cfg, paths, dry_run=False).run()
     assert result.ok, result.errors
 
-    if result.ok:
-        for sk in result.skipped:
-            print(f"\tSkipped: {sk}")
-        print("Success!")
+    print(f"{len(result.copied)} files copied.")
+    for sk in result.skipped:
+        print(f"\tSkipped: {sk}")
+    print("Success!")

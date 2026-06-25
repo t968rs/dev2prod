@@ -132,6 +132,29 @@ def _is_denied(
     )
 
 
+def _dir_is_denied(
+    name: str,
+    rel_posix: str,
+    local_denied: List[str],
+    global_denied: List[str],
+) -> bool:
+    """
+    True if a directory should be pruned (not descended into).
+
+    A directory matches both direct patterns (handled by _is_denied) and the
+    parent of a recursive pattern: "foo/bar/**" prunes the directory "foo/bar"
+    itself. fnmatch does not match a bare "foo/bar" against "foo/bar/**", so
+    that case is handled explicitly here.
+    """
+    if _is_denied(name, rel_posix, local_denied, global_denied):
+        return True
+    for p in local_denied + global_denied:
+        for suffix in ("/**", "/*"):
+            if p.endswith(suffix) and p[: -len(suffix)] == rel_posix:
+                return True
+    return False
+
+
 def _is_allowed(name: str, rel_posix: str, allowed: List[str]) -> bool:
     if not allowed:
         return True
@@ -164,7 +187,7 @@ def _recurse(
     for item in sorted(dir_path.iterdir()):
         rel_posix = item.relative_to(root).as_posix()
         if item.is_dir():
-            if not _is_denied(item.name, rel_posix, local_denied, global_denied):
+            if not _dir_is_denied(item.name, rel_posix, local_denied, global_denied):
                 _recurse(item, root, local_denied, global_denied, allowed, acc)
         elif item.is_file():
             if (
@@ -237,15 +260,19 @@ class ProdCopier:
         self, spec: FolderSpec
     ) -> Tuple[List[Path], List[Path], List[str]]:
         src_root = self._paths.source_root / spec.name
+        copied: List[Path] = []
+        skipped: List[Path] = []
+        errors: List[str] = []
+        if not src_root.is_dir():
+            # validate_source() already reported required folders that are
+            # missing; an absent optional folder is simply a no-op here.
+            return copied, skipped, errors
         files = _walk_folder(
             src_root,
             list(spec.denied),
             list(self._cfg.global_denied),
             list(spec.allowed),
         )
-        copied: List[Path] = []
-        skipped: List[Path] = []
-        errors: List[str] = []
         for src_file in files:
             rel = src_file.relative_to(self._paths.source_root)
             dst = self._paths.dest_root / rel
@@ -285,18 +312,18 @@ class ProdCopier:
     def _patch_debug_override(self) -> Tuple[List[Path], List[str]]:
         patched: List[Path] = []
         errors: List[str] = []
-        target = self._paths.dest_root / self._cfg.debug_override_rel
-        if not target.is_file() and not self._dry_run:
-            errors.append(f"debug_override_rel not found in dest: {target}")
+        if self._dry_run:
+            # Nothing is copied to dest in dry-run, so there is no file to patch.
             return patched, errors
-        elif self._dry_run:
+        target = self._paths.dest_root / self._cfg.debug_override_rel
+        if not target.is_file():
+            errors.append(f"debug_override_rel not found in dest: {target}")
             return patched, errors
         try:
             content = target.read_text(encoding="utf-8")
             new_content, count = self._DEBUG_PATTERN.subn(r"\g<1>False", content)
             if count:
-                if not self._dry_run:
-                    target.write_text(new_content, encoding="utf-8")
+                target.write_text(new_content, encoding="utf-8")
                 patched.append(target)
         except Exception as exc:
             errors.append(f"patch failed {target}: {exc}")

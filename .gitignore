@@ -6,6 +6,8 @@ out
 gen
 # ENV
 .env
+*.env
+project_definitions/*.env
 *.lock
 /FPM.txt
 _in_progress/**

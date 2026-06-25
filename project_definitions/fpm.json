@@ -17,6 +17,7 @@
   ],
   "top_level_files": [
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
     "*.atbx"
   ],
@@ -27,8 +28,10 @@
       "allowed": ["fpm/**"],
       "denied": [
         "_pre_tbx/**",
-        "_admin_utils/**",
-        "pyt_scripts/**"
+        "fpm/_admin_utils/**",
+        "pyt_scripts/**",
+        "fpm/_tbx_staging",
+        "__tests__"
       ]
     },
     {
