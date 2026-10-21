@@ -28,7 +28,8 @@
       "denied": [
         "_pre_tbx/**",
         "_admin_utils/**",
-        "pyt_scripts/**"
+        "pyt_scripts/**",
+        "scripts/fpm/_tbx_staging/**"
       ]
     },
     {
