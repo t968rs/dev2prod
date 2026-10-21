@@ -1,9 +1,9 @@
-
+TARGET_VERSION = "v3.17.1"
 
 if __name__ == "__main__":
     from conversion.prod_deploy import load_project, ProdCopier
 
-    cfg, paths = load_project("fpm")
+    cfg, paths = load_project("fpm", TARGET_VERSION)
     print(str(cfg))
 
     # Preview

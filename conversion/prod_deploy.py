@@ -25,6 +25,9 @@ from conversion.project_model import ProjectPaths, ProdConfig, FolderSpec
 _HERE_DIR = Path(__file__).parent.resolve()
 _PROJECT_DEF_DIR = _HERE_DIR.parent / "project_definitions"
 
+def _generate_project_version_folder_name(project_name: str, version_name: str) -> str:
+    return f"{project_name.upper()}_{version_name.strip('v').strip().replace('.', '_')}"
+
 
 # ------ Loading Helpers ---------------------------------------------------
 
@@ -46,14 +49,18 @@ def _parse_env(env_path: Path) -> dict:
     return result
 
 
-def _load_paths(env_path: Path) -> ProjectPaths:
+def _load_paths(env_path: Path, target_version: str) -> ProjectPaths:
     data = _parse_env(env_path)
     missing = [k for k in ("SOURCE_ROOT", "DEST_ROOT") if k not in data]
     if missing:
         raise KeyError(f"missing keys in {env_path}: {missing}")
     return ProjectPaths(
         source_root=Path(data["SOURCE_ROOT"]),
-        dest_root=Path(data["DEST_ROOT"]),
+        dest_root=Path(
+                data["DEST_ROOT"]) / _generate_project_version_folder_name(
+                env_path.stem,
+                target_version
+        ),
     )
 
 
@@ -64,6 +71,7 @@ def _load_paths(env_path: Path) -> ProjectPaths:
 
 def load_project(
     name: str,
+    target_version: str,
     project_def_dir: Optional[Path] = None,
 ) -> Tuple[ProdConfig, ProjectPaths]:
     """
@@ -76,7 +84,7 @@ def load_project(
     """
     base = project_def_dir or _PROJECT_DEF_DIR
     cfg = ProdConfig.from_json(base / f"{name}.json")
-    paths = _load_paths(base / f"{name}.env")
+    paths = _load_paths(base / f"{name}.env", target_version)
     return cfg, paths
 
 
